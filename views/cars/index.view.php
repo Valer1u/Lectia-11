@@ -26,22 +26,35 @@
                 </a>
             </div>
             <div class="row g-4">
-                <?php foreach($cars as $car): ?>
+                <?php foreach ($cars as $car): ?>
                     <div class="col-sm-6 col-md-4">
                         <div class="card h-100 shadow-sm car-card">
-                            <?php if(!empty($car->image)): ?>
-                                <img src="<?= $car->image ?>" class="card-img-top img-cover-small" alt="<?= htmlspecialchars($car->model) ?>">
+                            <?php if (!empty($car->image)): ?>
+                                <img src="<?= $car->image ?>" class="card-img-top img-cover-small"
+                                    alt="<?= htmlspecialchars($car->model) ?>">
                             <?php else: ?>
-                                <img src="https://via.placeholder.com/600x360?text=No+Image" class="card-img-top img-cover-small" alt="fără poză">
+                                <img src="https://via.placeholder.com/600x360?text=No+Image"
+                                    class="card-img-top img-cover-small" alt="fără poză">
                             <?php endif; ?>
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title mb-1 fw-bold accent-blue"><?= htmlspecialchars($car->model) ?></h5>
-                                <p class="card-text mb-2"><strong>Mecanic:</strong> <span class="text-muted"><?= $car->mechanic ? htmlspecialchars($car->mechanic->name) : '—' ?></span></p>
-                                <p class="card-text mb-3"><strong>Proprietar:</strong> <span class="text-muted"><?= $car->owner ? htmlspecialchars($car->owner->name) : '—' ?></span></p>
+                                <p class="card-text mb-2"><strong>Mecanic:</strong> <span
+                                        class="text-muted"><?= $car->mechanic ? htmlspecialchars($car->mechanic->name) : '—' ?></span>
+                                </p>
+                                <p class="card-text mb-3"><strong>Proprietar:</strong> <span
+                                        class="text-muted"><?= $car->owner ? htmlspecialchars($car->owner->name) : '—' ?></span>
+                                </p>
                                 <div class="mt-auto d-flex gap-2">
-                                    <a href="/cars/<?= $car->id; ?>" class="btn btn-sm btn-outline-info" title="Detalii"><i class="bi bi-eye"></i></a>
-                                    <a href="/cars/<?= $car->id; ?>/edit" class="btn btn-sm btn-outline-primary" title="Editează"><i class="bi bi-pencil-square"></i></a>
-                                    <a href="/cars/<?= $car->id; ?>/delete" class="btn btn-sm btn-outline-danger ms-auto" title="Șterge" onclick="return confirm('Sigur doriți să ștergeți această intrare?');"><i class="bi bi-trash"></i></a>
+                                    <a href="/cars/<?= $car->id; ?>" class="btn btn-sm btn-outline-info" title="Detalii"><i
+                                            class="bi bi-eye"></i></a>
+                                    <a href="/cars/<?= $car->id; ?>/edit" class="btn btn-sm btn-outline-primary"
+                                        title="Editează"><i class="bi bi-pencil-square"></i></a>
+                                    <form action="/cars/<?= $car->id; ?>/delete" method="post" style="display:inline"
+                                          onsubmit="return confirm('Sigur doriți să ștergeți această intrare?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-auto" title="Șterge">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

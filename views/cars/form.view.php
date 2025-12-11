@@ -35,15 +35,25 @@
                         <input type="text" name="model" class="form-control" value="<?= isset($old['model']) ? htmlspecialchars($old['model']) : ($car ? htmlspecialchars($car->model) : '') ?>" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label required">Mecanic (nume)</label>
-                        <input type="text" name="mechanic_name" class="form-control" placeholder="Introduceți numele mecanicului" value="<?= isset($old['mechanic_name']) ? htmlspecialchars($old['mechanic_name']) : ($car && $car->mechanic ? htmlspecialchars($car->mechanic->name) : '') ?>" required>
-                        <div class="form-text">Introduceți numele mecanicului — dacă nu există, va fi creat automat.</div>
+                        <label class="form-label required">Mecanic</label>
+                        <?php $mechanicsList = isset($mechanics) ? $mechanics : []; ?>
+                        <select name="mechanic_id" id="mechanic-select" class="form-select" required>
+                            <option value="">-- Selectează mecanic --</option>
+                            <?php foreach($mechanicsList as $m): ?>
+                                <?php
+                                    $selected = '';
+                                    if(isset($old['mechanic_id']) && $old['mechanic_id'] == $m->id) {
+                                        $selected = 'selected';
+                                    } elseif(empty($old) && isset($car) && $car && $car->mechanic && $car->mechanic->id == $m->id) {
+                                        $selected = 'selected';
+                                    }
+                                ?>
+                                <option value="<?= $m->id ?>" <?= $selected ?>><?= htmlspecialchars($m->name) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">Selectați mecanicul responsabil pentru această mașină.</div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label required">Nume Proprietar</label>
-                        <input type="text" name="owner_name" class="form-control" value="<?= isset($old['owner_name']) ? htmlspecialchars($old['owner_name']) : ($owner ? htmlspecialchars($owner->name) : '') ?>" required>
-                        <div class="form-text">Fiecare proprietar trebuie să aibă un nume unic în sistem.</div>
-                    </div>
+                    <!-- Proprietar field removed as requested -->
                     <div class="mb-3">
                         <label class="form-label">Poză Mașină (URL)</label>
                         <?php if($car && !empty($car->image)): ?>

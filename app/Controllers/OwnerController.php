@@ -21,8 +21,10 @@ class OwnerController extends Controller
 
     public function create(Request $request, Response $response)
     {
+        $cars = Car::orderBy('model')->get();
         $response->getBody()->write($this->view('owners/form.view.php', [
             'owner' => null,
+            'cars' => $cars,
             'action' => '/owners'
         ]));
         return $response;
@@ -36,12 +38,27 @@ class OwnerController extends Controller
         if(empty(trim($data['name'] ?? ''))){
             $errors[] = 'Câmpul "Nume" este obligatoriu.';
         }
+        // optional car selection
+        $carId = isset($data['car_id']) ? trim($data['car_id']) : '';
+        if (!empty($carId)) {
+            $car = Car::find($carId);
+            if (!$car) {
+                $errors[] = 'Mașina selectată este invalidă.';
+            } else {
+                // check if car already has an owner
+                if ($car->owner) {
+                    $errors[] = 'Mașina selectată are deja un proprietar.';
+                }
+            }
+        }
 
         if(!empty($errors)){
+            $cars = Car::orderBy('model')->get();
             $response->getBody()->write($this->view('owners/form.view.php', [
                 'errors' => $errors,
                 'old' => $data,
                 'owner' => null,
+                'cars' => $cars,
                 'action' => '/owners'
             ]));
             return $response;
@@ -49,17 +66,7 @@ class OwnerController extends Controller
 
         $owner = new Owner();
         $owner->name = $data['name'] ?? null;
-
-        $carModel = trim($data['car_model'] ?? '');
-        if(!empty($carModel)){
-            $car = new Car();
-            $car->model = $carModel;
-            $car->mechanic_id = null;
-            $car->save();
-            $owner->car_id = $car->id;
-        } else {
-            $owner->car_id = null;
-        }
+        $owner->car_id = !empty($carId) ? intval($carId) : null;
 
         $owner->save();
         return $response->withHeader('Location', '/owners')->withStatus(302);
@@ -85,8 +92,10 @@ class OwnerController extends Controller
     {
         $id = $args['id'] ?? null;
         $owner = Owner::find($id);
+        $cars = Car::orderBy('model')->get();
         $response->getBody()->write($this->view('owners/form.view.php', [
             'owner' => $owner,
+            'cars' => $cars,
             'action' => '/owners/' . $id . '/update'
         ]));
         return $response;
@@ -105,31 +114,34 @@ class OwnerController extends Controller
         if(empty(trim($data['name'] ?? ''))){
             $errors[] = 'Câmpul "Nume" este obligatoriu.';
         }
+
+        $carId = isset($data['car_id']) ? trim($data['car_id']) : '';
+        if (!empty($carId)) {
+            $car = Car::find($carId);
+            if (!$car) {
+                $errors[] = 'Mașina selectată este invalidă.';
+            } else {
+                // allow if car is unowned or currently owned by this owner
+                if ($car->owner && $car->owner->id != $owner->id) {
+                    $errors[] = 'Mașina selectată este deja atribuită unui alt proprietar.';
+                }
+            }
+        }
+
         if(!empty($errors)){
+            $cars = Car::orderBy('model')->get();
             $response->getBody()->write($this->view('owners/form.view.php', [
                 'errors' => $errors,
                 'old' => $data,
                 'owner' => $owner,
+                'cars' => $cars,
                 'action' => '/owners/' . $id . '/update'
             ]));
             return $response;
         }
 
         $owner->name = $data['name'] ?? $owner->name;
-        $carModel = trim($data['car_model'] ?? '');
-        if(!empty($carModel)){
-            if($owner->car){
-                $owner->car->model = $carModel;
-                $owner->car->save();
-                $owner->car_id = $owner->car->id;
-            } else {
-                $car = new Car();
-                $car->model = $carModel;
-                $car->mechanic_id = null;
-                $car->save();
-                $owner->car_id = $car->id;
-            }
-        }
+        $owner->car_id = !empty($carId) ? intval($carId) : null;
         $owner->save();
         return $response->withHeader('Location', '/owners')->withStatus(302);
     }

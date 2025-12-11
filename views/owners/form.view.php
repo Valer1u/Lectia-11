@@ -30,9 +30,28 @@
                                 <input type="text" name="name" class="form-control" value="<?= isset($old['name']) ? htmlspecialchars($old['name']) : ($owner ? htmlspecialchars($owner->name) : '') ?>" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Mașină (opțional) — introdu modelul</label>
-                                <input type="text" name="car_model" class="form-control" placeholder="Ex: Dacia Logan" value="<?= isset($old['car_model']) ? htmlspecialchars($old['car_model']) : ($owner && $owner->car ? htmlspecialchars($owner->car->model) : '') ?>">
-                        <div class="form-text">Dacă completați, se va crea/legă o mașină cu acest model pentru proprietar.</div>
+                        <label class="form-label">Mașină (opțional) — selectează din mașinile existente</label>
+                        <?php $carsList = isset($cars) ? $cars : []; ?>
+                        <select name="car_id" class="form-select">
+                            <option value="">-- Nicio mașină --</option>
+                            <?php foreach($carsList as $c): ?>
+                                <?php
+                                    $sel = '';
+                                    $disabled = '';
+                                    if(isset($old['car_id']) && $old['car_id'] == $c->id) {
+                                        $sel = 'selected';
+                                    } elseif(empty($old) && isset($owner) && $owner && $owner->car && $owner->car->id == $c->id) {
+                                        $sel = 'selected';
+                                    }
+                                    // disable if car already has an owner (and it's not this owner)
+                                    if($c->owner && (!isset($owner) || $owner->car_id != $c->id)) {
+                                        $disabled = 'disabled';
+                                    }
+                                ?>
+                                <option value="<?= $c->id ?>" <?= $sel ?> <?= $disabled ?>><?= htmlspecialchars($c->model) ?><?= $c->owner ? ' — (ocupată)' : '' ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">Selectați o mașină existentă pentru acest proprietar. Mașinile ocupate sunt dezactivate.</div>
                     </div>
                     <div class="d-flex justify-content-between">
                         <a href="/owners" class="btn btn-outline-secondary">Înapoi</a>
